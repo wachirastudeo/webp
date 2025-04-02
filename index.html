@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PNG/JPG to WebP Converter</title>
+</head>
+
+<body>
+    <h2>PNG/JPG to WebP Converter</h2>
+    <input type="file" id="inputFile" accept="image/png, image/jpeg" multiple>
+    <br><br>
+    <button id="convertButton">Convert to WebP</button>
+    <br><br>
+    <div id="status"></div>
+    <div id="output"></div>
+
+    <script>
+        document.getElementById('convertButton').addEventListener('click', function () {
+            const files = document.getElementById('inputFile').files;
+            const statusDiv = document.getElementById('status');
+            const outputDiv = document.getElementById('output');
+
+            if (files.length === 0) {
+                alert("Please select some files!");
+                return;
+            }
+
+            // Clear previous results and status
+            outputDiv.innerHTML = '';
+            statusDiv.innerHTML = 'Converting... Please wait...';
+
+            // Process each file
+            let filesProcessed = 0;
+            for (const file of files) {
+                const reader = new FileReader();
+                reader.onload = function (event) {
+                    const img = new Image();
+                    img.onload = function () {
+                        // Set resize percentage (e.g., 50% of original size)
+                        const resizeFactor = 0.8;
+
+                        // Create canvas and resize image
+                        const canvas = document.createElement('canvas');
+                        const ctx = canvas.getContext('2d');
+                        canvas.width = img.width * resizeFactor;
+                        canvas.height = img.height * resizeFactor;
+                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+                        // Convert to WebP with quality setting
+                        const webpDataUrl = canvas.toDataURL('image/webp', 0.8); // Quality set to 0.8 (80%)
+
+                        // Create a download link for the WebP file
+                        const link = document.createElement('a');
+                        link.href = webpDataUrl;
+                        link.download = file.name.replace(/\.(png|jpg|jpeg)$/, '.webp');
+                        link.textContent = 'Download ' + file.name.replace(/\.(png|jpg|jpeg)$/, '.webp');
+
+                        outputDiv.appendChild(link);
+                        outputDiv.appendChild(document.createElement('br'));
+
+                        filesProcessed++;
+
+                        // Update status when all files are processed
+                        if (filesProcessed === files.length) {
+                            statusDiv.innerHTML = 'Conversion completed! You can download your WebP files.';
+                        }
+                    };
+                    img.src = event.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    </script>
+</body>
+
+</html>
