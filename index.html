@@ -38,17 +38,14 @@
                 reader.onload = function (event) {
                     const img = new Image();
                     img.onload = function () {
-                        // Set resize percentage (e.g., 50% of original size)
-                        const resizeFactor = 0.8;
-
-                        // Create canvas and resize image
+                        // Create canvas with the original image size (no resizing)
                         const canvas = document.createElement('canvas');
                         const ctx = canvas.getContext('2d');
-                        canvas.width = img.width * resizeFactor;
-                        canvas.height = img.height * resizeFactor;
-                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                        canvas.width = img.width;
+                        canvas.height = img.height;
+                        ctx.drawImage(img, 0, 0);
 
-                        // Convert to WebP with quality setting
+                        // Convert to WebP with quality setting (keeping original resolution)
                         const webpDataUrl = canvas.toDataURL('image/webp', 0.8); // Quality set to 0.8 (80%)
 
                         // Create a download link for the WebP file
