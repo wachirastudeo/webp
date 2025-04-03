@@ -5,71 +5,100 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PNG/JPG to WebP Converter</title>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
-<body>
-    <h2>PNG/JPG to WebP Converter</h2>
-    <input type="file" id="inputFile" accept="image/png, image/jpeg" multiple>
-    <br><br>
-    <button id="convertButton">Convert to WebP</button>
-    <br><br>
-    <div id="status"></div>
-    <div id="output"></div>
+<body class="bg-gray-100 flex justify-center items-center h-screen">
+
+    <div class="bg-white shadow-lg rounded-lg p-6 w-1/2 text-center">
+        <h2 class="text-xl font-bold text-gray-800">PNG/JPG to WebP Converter</h2>
+
+        <input type="file" id="inputFile" accept="image/png, image/jpeg" multiple
+            class="mt-4 block w-full text-sm text-gray-700 border border-gray-300 rounded-lg cursor-pointer focus:outline-none">
+
+        <button id="convertButton"
+            class="mt-4 w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition">
+            Convert to WebP
+        </button>
+
+        <button id="downloadAllButton"
+            class="mt-2 w-full bg-green-500 text-white py-2 rounded-lg hover:bg-green-600 transition hidden">
+            Download All
+        </button>
+
+        <div id="status" class="mt-4 text-gray-600"></div>
+        <div id="output" class="mt-4 text-left"></div>
+    </div>
 
     <script>
         document.getElementById('convertButton').addEventListener('click', function () {
             const files = document.getElementById('inputFile').files;
             const statusDiv = document.getElementById('status');
             const outputDiv = document.getElementById('output');
+            const downloadAllButton = document.getElementById('downloadAllButton');
+            let webpFiles = [];
 
             if (files.length === 0) {
                 alert("Please select some files!");
                 return;
             }
 
-            // Clear previous results and status
+            // Clear previous results
             outputDiv.innerHTML = '';
             statusDiv.innerHTML = 'Converting... Please wait...';
+            webpFiles = [];
 
-            // Process each file
             let filesProcessed = 0;
             for (const file of files) {
                 const reader = new FileReader();
                 reader.onload = function (event) {
                     const img = new Image();
                     img.onload = function () {
-                        // Create canvas with the original image size (no resizing)
                         const canvas = document.createElement('canvas');
                         const ctx = canvas.getContext('2d');
                         canvas.width = img.width;
                         canvas.height = img.height;
                         ctx.drawImage(img, 0, 0);
 
-                        // Convert to WebP with quality setting (keeping original resolution)
-                        const webpDataUrl = canvas.toDataURL('image/webp', 0.8); // Quality set to 0.8 (80%)
+                        const webpDataUrl = canvas.toDataURL('image/webp', 0.8);
+                        const webpFilename = file.name.replace(/\.(png|jpg|jpeg)$/, '.webp');
 
-                        // Create a download link for the WebP file
-                        const link = document.createElement('a');
-                        link.href = webpDataUrl;
-                        link.download = file.name.replace(/\.(png|jpg|jpeg)$/, '.webp');
-                        link.textContent = 'Download ' + file.name.replace(/\.(png|jpg|jpeg)$/, '.webp');
+                        webpFiles.push({ dataUrl: webpDataUrl, filename: webpFilename });
 
-                        outputDiv.appendChild(link);
-                        outputDiv.appendChild(document.createElement('br'));
+                        const fileLink = document.createElement('a');
+                        fileLink.href = webpDataUrl;
+                        fileLink.download = webpFilename;
+                        fileLink.textContent = '🔗 ' + webpFilename;
+                        fileLink.classList.add("block", "text-blue-600", "hover:underline", "mt-1");
+                        outputDiv.appendChild(fileLink);
 
                         filesProcessed++;
 
-                        // Update status when all files are processed
                         if (filesProcessed === files.length) {
-                            statusDiv.innerHTML = 'Conversion completed! You can download your WebP files.';
+                            statusDiv.innerHTML = '✅ Conversion completed!';
+                            if (webpFiles.length > 1) {
+                                downloadAllButton.classList.remove("hidden");
+                            }
                         }
                     };
                     img.src = event.target.result;
                 };
                 reader.readAsDataURL(file);
             }
+
+            downloadAllButton.onclick = function () {
+                webpFiles.forEach(file => {
+                    const link = document.createElement('a');
+                    link.href = file.dataUrl;
+                    link.download = file.filename;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                });
+            };
         });
     </script>
+
 </body>
 
 </html>
