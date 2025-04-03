@@ -8,26 +8,26 @@
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
-<body class="bg-gray-100 flex justify-center items-center h-screen">
+<body class="bg-gray-100 flex justify-center items-center min-h-screen p-6">
 
-    <div class="bg-white shadow-lg rounded-lg p-6 w-1/2 text-center">
-        <h2 class="text-xl font-bold text-gray-800">PNG/JPG to WebP Converter</h2>
+    <div class="bg-white shadow-lg rounded-lg p-8 w-full max-w-4xl text-center">
+        <h2 class="text-3xl font-bold text-gray-800">PNG/JPG to WebP Converter</h2>
 
         <input type="file" id="inputFile" accept="image/png, image/jpeg" multiple
-            class="mt-4 block w-full text-sm text-gray-700 border border-gray-300 rounded-lg cursor-pointer focus:outline-none">
+            class="mt-4 block w-full text-lg text-gray-700 border border-gray-300 rounded-lg cursor-pointer focus:outline-none">
 
         <button id="convertButton"
-            class="mt-4 w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition">
+            class="mt-4 w-full bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600 transition text-lg">
             Convert to WebP
         </button>
 
         <button id="downloadAllButton"
-            class="mt-2 w-full bg-green-500 text-white py-2 rounded-lg hover:bg-green-600 transition hidden">
+            class="mt-2 w-full bg-green-500 text-white py-3 rounded-lg hover:bg-green-600 transition text-lg hidden">
             Download All
         </button>
 
-        <div id="status" class="mt-4 text-gray-600"></div>
-        <div id="output" class="mt-4 text-left"></div>
+        <div id="status" class="mt-4 text-gray-600 text-lg"></div>
+        <div id="output" class="mt-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6"></div>
     </div>
 
     <script>
@@ -65,12 +65,34 @@
 
                         webpFiles.push({ dataUrl: webpDataUrl, filename: webpFilename });
 
+                        // สร้างส่วนแสดงภาพ
+                        const imgContainer = document.createElement('div');
+                        imgContainer.classList.add("bg-gray-200", "p-3", "rounded-lg", "shadow-lg", "text-center");
+
+                        const imgElement = document.createElement('img');
+                        imgElement.src = webpDataUrl;
+                        imgElement.alt = "Converted Image";
+                        imgElement.classList.add("w-full", "h-auto", "rounded", "cursor-pointer");
+
+                        // คลิกที่รูปให้ดาวน์โหลดได้
+                        imgElement.addEventListener('click', function () {
+                            const link = document.createElement('a');
+                            link.href = webpDataUrl;
+                            link.download = webpFilename;
+                            document.body.appendChild(link);
+                            link.click();
+                            document.body.removeChild(link);
+                        });
+
                         const fileLink = document.createElement('a');
                         fileLink.href = webpDataUrl;
                         fileLink.download = webpFilename;
-                        fileLink.textContent = '🔗 ' + webpFilename;
-                        fileLink.classList.add("block", "text-blue-600", "hover:underline", "mt-1");
-                        outputDiv.appendChild(fileLink);
+                        fileLink.textContent = "Download";
+                        fileLink.classList.add("block", "mt-2", "text-blue-600", "hover:underline", "text-lg");
+
+                        imgContainer.appendChild(imgElement);
+                        imgContainer.appendChild(fileLink);
+                        outputDiv.appendChild(imgContainer);
 
                         filesProcessed++;
 
